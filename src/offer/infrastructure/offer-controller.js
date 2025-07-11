@@ -34,21 +34,21 @@ class OfferController {
             const requestBody = req.body;
             //Si el req.body no es un array, da error con un if
             if (!Array.isArray(requestBody)) {
-                next(httpError.BadRequestError('El body debe ser un array de offers'));
+                return next(httpError.BadRequestError('El body debe ser un array de offers'));
             }
             for (let i = 0; i < requestBody.length; i++) {
                 const offer = requestBody[i];
                 if (!offer.sku || offer.is_published == undefined) {
-                    next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku e is_published`));
+                    return next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku e is_published`));
                 }
                 if(Array.isArray(offer.prices)) {
                     for (const price of offer.prices) {
                         if (typeof price.value !== 'number') {
-                            next(httpError.BadRequestError(`El precio de la oferta ${offer.sku} no es un numero`));
+                            return next(httpError.BadRequestError(`El precio de la oferta ${offer.sku} no es un numero`));
                         }
                         price.value = Math.trunc(price.value * 100) / 100; // Truncamos el valor del precio a dos decimales
                         if (price.value < 0) {
-                            next(httpError.BadRequestError(`El precio de la oferta ${offer.sku} no puede ser negativo`));
+                            return next(httpError.BadRequestError(`El precio de la oferta ${offer.sku} no puede ser negativo`));
                         }
 
                     }
@@ -59,7 +59,7 @@ class OfferController {
             const offerRespone = result.map(offer => new OfferResponseDTO(offer));
             res.status(201).success({data: offerRespone});
         } catch (error) {
-            next(httpError.InternalServerError(error.message));
+            return next(httpError.InternalServerError(error.message));
         }
     }
 
@@ -68,13 +68,13 @@ class OfferController {
             const requestBody = req.body;
             //Si el req.body no es un array, da error con un if
             if (!Array.isArray(requestBody)) {
-                next(httpError.BadRequestError('El body debe ser un array de offers'));
+                return next(httpError.BadRequestError('El body debe ser un array de offers'));
             }
             //Recorremos el array de offers y validamos que cada offer tenga los campos obligatorios (sku e is_published)
             for (let i = 0; i < requestBody.length; i++) {
                 const offer = requestBody[i];
                 if (!offer.sku || offer.is_published == undefined) {
-                    next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku e is_published`));
+                    return next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku e is_published`));
                 }
             }
             const result = await this.offerService.updateFullOffer(requestBody);
@@ -83,9 +83,9 @@ class OfferController {
             res.status(201).success({data:offerResponse});
         } catch (error) {
             if(error instanceof OfferNotFoundError){
-                next(httpError.NotFoundError(error.message));
+                return next(httpError.NotFoundError(error.message));
             }
-            next(httpError.InternalServerError(error.message));
+            return next(httpError.InternalServerError(error.message));
         }
     }
 
@@ -93,13 +93,13 @@ class OfferController {
         try {
             const requestBody = req.body;
             if (!Array.isArray(requestBody)) {
-                next(httpError.BadRequestError('El body debe ser un array de offers'));
+                return next(httpError.BadRequestError('El body debe ser un array de offers'));
             }
             //Recorremos el array de offers y validamos que cada offer tenga los campos obligatorios (sku)
             for (let i = 0; i < requestBody.length; i++) {
                 const offer = requestBody[i];
                 if (!offer.sku) {
-                    next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku`));
+                    return next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios: sku`));
                 }
             }
             const result = await this.offerService.updateOffer(requestBody);
@@ -108,9 +108,9 @@ class OfferController {
             res.status(201).success({data:offerResponse});
         } catch (error) {
             if(error instanceof OfferNotFoundError){
-                next(httpError.NotFoundError(error.message));
+                return next(httpError.NotFoundError(error.message));
             }
-            next(httpError.InternalServerError(error.message));
+            return next(httpError.InternalServerError(error.message));
         }
     }
 
@@ -120,13 +120,13 @@ class OfferController {
             let arrayDeSkus = [];
             //Si el req.body no es un array, da error con un if
             if (!Array.isArray(requestBody)) {
-                next(httpError.BadRequestError('El body debe ser un array de offers'));
+                return next(httpError.BadRequestError('El body debe ser un array de offers'));
             }
             //Recorremos el array de offers y validamos que cada offer tenga los campos obligatorios (sku)
             for (let i = 0; i < requestBody.length; i++) {
                 const offer = requestBody[i];
                 if (!offer.sku) {
-                    next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios para eliminar: sku`));
+                    return next(httpError.BadRequestError(`El offer en la posicion ${i} no tiene todos los campos obligatorios para eliminar: sku`));
                 }
                 arrayDeSkus.push({sku : offer.sku});
             }
@@ -135,9 +135,9 @@ class OfferController {
             res.status(200).success({message: result});
         } catch (error) {
             if(error instanceof OfferNotFoundError){
-                next(httpError.NotFoundError(error.message));
+                return next(httpError.NotFoundError(error.message));
             }
-            next(httpError.InternalServerError(error.message));
+            return next(httpError.InternalServerError(error.message));
         }
     }
 
@@ -170,7 +170,7 @@ class OfferController {
     
         res.success({data: offerResponse, message: 'success', meta: paginationMetadataResponseDTO});
       } catch (error) {
-        next(httpError.InternalServerError(error.message));
+        return next(httpError.InternalServerError(error.message));
       }
     } 
   }
